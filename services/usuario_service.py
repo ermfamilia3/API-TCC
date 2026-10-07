@@ -1,0 +1,91 @@
+from sqlalchemy.orm import Session
+from passlib.context import CryptContext
+
+from models import Usuario
+from schemas import UsuarioCreate, UsuarioUpdate
+
+
+pwd_context = CryptContext(
+    schemes=["bcrypt"],
+    deprecated="auto"
+)
+
+
+def criar_usuario(db: Session, usuario: UsuarioCreate):
+
+    usuario_existente = db.query(Usuario).filter(
+        Usuario.email == usuario.email
+    ).first()
+
+    if usuario_existente:
+        return None
+
+    senha_hash = pwd_context.hash(usuario.senha)
+
+    novo_usuario = Usuario(
+        nome=usuario.nome,
+        email=usuario.email,
+        senha=senha_hash
+    )
+
+    db.add(novo_usuario)
+    db.commit()
+    db.refresh(novo_usuario)
+
+    return novo_usuario
+
+
+def autenticar_usuario(
+    db: Session,
+    email: str,
+    senha: str
+):
+    usuario = db.query(Usuario).filter(
+        Usuario.email == email
+    ).first()
+
+    if not usuario:
+        return None
+
+    if not pwd_context.verify(senha, usuario.senha):
+        return None
+
+    return usuario
+
+
+def atualizar_usuario(
+    db: Session,
+    usuario_id: int,
+    dados: UsuarioUpdate
+):
+    usuario = db.query(Usuario).filter(
+        Usuario.id == usuario_id
+    ).first()
+
+    if usuario is None:
+        return None
+
+    usuario.nome = dados.nome
+    usuario.email = dados.email
+
+    db.commit()
+    db.refresh(usuario)
+
+    return usuario
+
+
+def excluir_usuario(
+    db: Session,
+    usuario_id: int
+):
+    usuario = db.query(Usuario).filter(
+        Usuario.id == usuario_id
+    ).first()
+
+    if usuario is None:
+        return None
+
+    db.delete(usuario)
+    db.commit()
+
+    return usuario
