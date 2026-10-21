@@ -53,6 +53,7 @@ def autenticar_usuario(
     return usuario
 
 
+
 def atualizar_usuario(
     db: Session,
     usuario_id: int,
@@ -65,6 +66,15 @@ def atualizar_usuario(
     if usuario is None:
         return None
 
+    # Verifica se outro usuário já utiliza o e-mail
+    email_existente = db.query(Usuario).filter(
+        Usuario.email == dados.email,
+        Usuario.id != usuario_id
+    ).first()
+
+    if email_existente:
+        return "email_duplicado"
+
     usuario.nome = dados.nome
     usuario.email = dados.email
 
@@ -72,6 +82,7 @@ def atualizar_usuario(
     db.refresh(usuario)
 
     return usuario
+
 
 
 def excluir_usuario(

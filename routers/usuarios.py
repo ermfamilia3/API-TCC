@@ -113,17 +113,22 @@ def login(
 # BUSCAR USUÁRIO
 # =========================
 
-@router.get(
-    "/{usuario_id}",
-    response_model=UsuarioResponse
-)
+
+@router.get("/{usuario_id}", response_model=UsuarioResponse)
 def buscar_usuario(
     usuario_id: int,
     db: Session = Depends(get_db),
     usuario_atual: Usuario = Depends(get_usuario_atual)
 ):
+    # Impede consultar os dados de outro usuário
+    if usuario_atual.id != usuario_id:
+        raise HTTPException(
+            status_code=403,
+            detail="Você não pode consultar outro usuário"
+        )
+
     usuario = db.query(Usuario).filter(
-        Usuario.id == usuario_id
+        Usuario.id == usuario_atual.id
     ).first()
 
     if usuario is None:
@@ -133,6 +138,7 @@ def buscar_usuario(
         )
 
     return usuario
+
 
 
 # =========================
@@ -160,7 +166,11 @@ def atualizar_usuario_rota(
         usuario_id,
         dados
     )
-
+    if usuario == "email_duplicado":
+        raise HTTPException(
+            status_code=409,
+            detail="E-mail já cadastrado"
+        )
     if usuario is None:
         raise HTTPException(
             status_code=404,
