@@ -28,9 +28,13 @@ def criar_usuario(db: Session, usuario: UsuarioCreate):
         senha=senha_hash
     )
 
-    db.add(novo_usuario)
-    db.commit()
-    db.refresh(novo_usuario)
+    try:
+        db.add(novo_usuario)
+        db.commit()
+        db.refresh(novo_usuario)
+    except Exception:
+        db.rollback()
+        raise
 
     return novo_usuario
 
@@ -78,9 +82,13 @@ def atualizar_usuario(
     usuario.nome = dados.nome
     usuario.email = dados.email
 
-    db.commit()
-    db.refresh(usuario)
-
+    try:
+        db.add(atualizar_usuario())
+        db.commit()
+        db.refresh(atualizar_usuario())
+    except Exception:
+        db.rollback()
+        raise
     return usuario
 
 
@@ -96,7 +104,12 @@ def excluir_usuario(
     if usuario is None:
         return None
 
-    db.delete(usuario)
-    db.commit()
+    try:
+        db.add(excluir_usuario())
+        db.commit()
+        db.refresh(excluir_usuario())
+    except Exception:
+        db.rollback()
+        raise
 
     return usuario

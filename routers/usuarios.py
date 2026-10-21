@@ -62,13 +62,14 @@ def cadastrar_usuario(
 # LISTAR USUÁRIOS
 # =========================
 
+
 @router.get("/", response_model=list[UsuarioResponse])
 def listar_usuarios(
-    db: Session = Depends(get_db)
+    db: Session = Depends(get_db),
+    usuario_atual: Usuario = Depends(get_usuario_atual)
 ):
-    usuarios = db.query(Usuario).all()
+    return [usuario_atual]
 
-    return usuarios
 
 
 # =========================
@@ -95,10 +96,7 @@ def login(
     expiracao = datetime.utcnow() + timedelta(hours=2)
 
     token = jwt.encode(
-        {
-            "sub": str(usuario.id),
-            "exp": expiracao
-        },
+        {"sub": str(usuario.id), "exp": expiracao},
         SECRET_KEY,
         algorithm=ALGORITHM
     )

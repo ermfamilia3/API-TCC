@@ -1,10 +1,11 @@
-from pydantic import BaseModel, EmailStr
+
+from pydantic import BaseModel, EmailStr, Field, ConfigDict
 
 
 class UsuarioCreate(BaseModel):
-    nome: str
+    nome: str = Field(min_length=2, max_length=100)
     email: EmailStr
-    senha: str
+    senha: str = Field(min_length=8, max_length=64)
 
 
 class UsuarioLogin(BaseModel):
@@ -13,7 +14,7 @@ class UsuarioLogin(BaseModel):
 
 
 class UsuarioUpdate(BaseModel):
-    nome: str
+    nome: str = Field(min_length=2, max_length=100)
     email: EmailStr
 
 
@@ -22,5 +23,4 @@ class UsuarioResponse(BaseModel):
     nome: str
     email: EmailStr
 
-    class Config:
-        from_attributes = True
+    model_config = ConfigDict(from_attributes=True)
