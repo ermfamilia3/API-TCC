@@ -1,0 +1,6 @@
+-- Execute no MySQL para criar o banco usado no arquivo .env.
+CREATE DATABASE IF NOT EXISTS teste_api
+  CHARACTER SET utf8mb4
+  COLLATE utf8mb4_unicode_ci;
+
+-- As tabelas são criadas pelo SQLAlchemy quando a API inicia.
